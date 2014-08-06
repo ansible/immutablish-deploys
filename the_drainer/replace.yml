@@ -1,9 +1,9 @@
-# - hosts: localhost
-#   gather_facts: no
-#   connection: local
-#   roles:
-#   - infra   
-#   - asg
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  roles:
+  - infra   
+  - asg
  
 - hosts: localhost
   gather_facts: no
