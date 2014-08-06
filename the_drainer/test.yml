@@ -1,0 +1,19 @@
+- hosts: tag_aws_autoscaling_groupName_rollingAMI
+  connection: local
+  gather_facts: no
+  tasks:
+  - local_action: group_by key={{ hostvars[inventory_hostname]['ec2_image_id'] }}
+
+
+- hosts: "tag_aws_autoscaling_groupName_rollingAMI:!{{ image_id }}"
+  gather_facts: no
+  serial: "{{ batch_size }}"
+  vars:
+    desired_capacity: 5
+  tasks:
+  - name: wait for number_of_healthy_instances >= desired_capacity
+    local_action: ec2_asg_facts name=rollingAMI region=us-east-1
+    register: result
+    until: result.healthy_instances >= desired_capacity
+    delay: 10
+    retries: 120

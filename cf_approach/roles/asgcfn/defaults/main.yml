@@ -1,0 +1,7 @@
+---
+# defaults file for asg
+instance_type: t2.small
+availability_zones:
+- us-east-1b
+- us-east-1c
+region: us-east-1

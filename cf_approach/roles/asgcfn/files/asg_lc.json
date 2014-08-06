@@ -1,0 +1,75 @@
+{
+
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description": "AWS CloudFormation Sample Template AutoScalingRollingUpdates: Create a load balanced, Auto Scaled sample website. This example creates an Auto Scaling group behind a load balancer with a simple health check using a basic getting start AMI that has a simple Apache Web Server-based PHP page. The autoscaling launch configuration includes an update policy that will keep 2 instances running while doing an autoscaling rolling upgrade. **WARNING** This template creates one or more Amazon EC2  instances and an Elastic Load Balancer. You will be billed for the AWS resources used if you create a stack from this template.",
+
+    "Parameters": {
+        "InstanceType": {
+            "Description": "WebServer EC2 instance type",
+            "Type": "String",
+            "Default": "t2.small",
+            "AllowedValues": [
+                "t2.small"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        },
+        "KeyName": {
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+            "Type": "String"
+        },
+        "ImageId": {
+            "Description": "The ImageId for the LaunchConfig",
+            "Type": "String"
+        },
+        "SecurityGroups": {
+            "Description": "Security groups for the Launch Configuration.",
+            "Type": "CommaDelimitedList"
+        },        
+        "Subnets": {
+            "Description": "Subnets you wish to use for the Auto Scale Group.",
+            "Type": "CommaDelimitedList"
+        },
+        "AvailabilityZones": {
+            "Description": "AZs you wish to use for the Auto Scale Group.",
+            "Type": "CommaDelimitedList"
+        },        
+        "LoadBalancerNames": {
+            "Description": "Name of the ELBs to use.",
+            "Type": "CommaDelimitedList"
+        }                           
+    },
+
+    "Resources": {
+        "WebServerGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+          
+            "UpdatePolicy" : {
+                "AutoScalingRollingUpdate" : {
+                "MaxBatchSize" : "1",
+                "MinInstancesInService" : "5",
+                "PauseTime" : "PT0M30S"
+              }
+            },
+
+            "Properties": {
+                "VPCZoneIdentifier" : { "Ref": "Subnets"},
+                "AvailabilityZones" : { "Ref": "AvailabilityZones"},                
+                "LaunchConfigurationName": { "Ref": "LaunchConfig" },
+                "MinSize": "5",
+                "MaxSize": "10",
+                "DesiredCapacity" : "5",
+                "LoadBalancerNames": { "Ref": "LoadBalancerNames" }
+            }
+        },
+        "LaunchConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "KeyName": { "Ref": "KeyName" },
+                "ImageId": { "Ref": "ImageId" },
+                "SecurityGroups": { "Ref": "SecurityGroups" },
+                "InstanceType": { "Ref": "InstanceType" }
+            }
+        }
+    }
+}

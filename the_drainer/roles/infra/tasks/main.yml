@@ -1,0 +1,86 @@
+# tasks file for myapp_infra
+- name: create vpc
+  action:
+    module: ec2_vpc
+    state: present
+    cidr_block: 172.22.0.0/16
+    resource_tags: { "Name":" {{ app_name }}" }
+    subnets: "{{ subnets }}"       
+    internet_gateway: True
+    route_tables: "{{ route_tables }}"
+    region: "{{ region }}"
+    wait: yes
+  register: vpc
+
+
+- name: create admin access 
+  action: 
+    module: ec2_group
+    name: admin_access
+    description: SSH access for admins and tower
+    region: "{{ region }}"
+    vpc_id: "{{ vpc.vpc_id }}"
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+  tags: security_groups
+  register: admin_access_group
+
+
+- name: create app security group
+  action:
+    module: ec2_group
+    name: "{{ app_name }}"
+    description: "{{ app_name }} security group"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 0
+        to_port: 65535
+        group_name: "{{ app_name }}"
+      - proto: udp
+        from_port: 0
+        to_port: 65535
+        group_name: "{{ app_name }}"
+      - proto: icmp
+        from_port: 0
+        to_port: 0
+        group_name: "{{ app_name }}"
+    vpc_id: "{{ vpc.vpc_id }}"
+  tags: security_groups
+  register: app_security_group
+
+- name: launch load balancer
+  local_action:
+    module: ec2_elb_lb
+    name: "{{ app_name }}"
+    region: "{{ region }}"
+    state: present
+    subnets: "{{ asg_subnets }}"    
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 80
+    health_check:
+        ping_protocol: http 
+        ping_port: 80
+        ping_path: "/"
+        response_timeout: 5 
+        interval: 30
+        unhealthy_threshold: 2
+        healthy_threshold: 10
+  register: load_balancer
+
+
+
+
+
+
+
+

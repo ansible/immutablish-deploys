@@ -1,0 +1,27 @@
+---
+# tasks file for asg
+- name: create launch config
+  local_action:
+    module: ec2_lc
+    name: "{{ lc_name }}"
+    image_id: "{{ image_id }}"
+    key_name: "{{ key_name }}"
+    region: "{{ region }}"
+    security_groups: "{{ lc_security_groups }}"
+    instance_type: "{{ instance_type }}"
+    public_ip: yes
+  tags: launch_config
+
+- name: create autoscale groups
+  local_action:
+    module: ec2_asg
+    name: "{{ group_name }}"
+    load_balancers: "{{ load_balancers }}"
+    availability_zones: "{{ availability_zones | join(',')}}"
+    launch_config_name: "{{ lc_name }}"
+    min_size: 5
+    max_size: 10
+    desired_capacity: 5
+    region: "{{ region }}"
+    vpc_zone_identifier: "{{ asg_subnets | join(',') }}"
+  tags: autoscale_group

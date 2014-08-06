@@ -1,0 +1,13 @@
+app_name: rollingAMI
+load_balancers: 
+- rollingAMI
+key_name: jmartin
+group_name: rollingAMI
+lc_name: rollingAMI-4
+instance_type: m1.small
+lc_security_groups:
+- "{{ app_security_group.group_id }}"
+- "{{ admin_access_group.group_id }}"
+asg_subnets:
+- "{{ vpc.subnets[0].id }}"
+- "{{ vpc.subnets[1].id }}"
