@@ -1,68 +1,51 @@
-- hosts: localhost
+# include the infra  playbook so we have some registered variables
+# - include: infra.yml
+
+- hosts: "{{ target_cluster }}"
   gather_facts: no
-  connection: local
-  roles:
-  - infra   
-  - asg
- 
-- hosts: localhost
-  gather_facts: no
-  connection: local
   tasks:
 
   # temporarily increase the desired_capacity and minimum_size by
   # the batch_size
-  - name: get autoscale group info
-    ec2_asg: name=rollingAMI region=us-east-1
-    register: asg_info
-
-
   - name: set temporary settings
-    ec2_asg: name=rollingAMI region=us-east-1 
-             desired_capacity=6
-             min_size=6
+    ec2_asg: name={{ asg_group_name }} 
+             region={{ region }} 
+             desired_capacity={{ tmp_desired_capacity }}
+             min_size={{ tmp_min_size }}
+
+  # we need to wait for the ASG health_check_grace period + LB Unhealthythreshold * LB HealthCheck Interval
+  # + Buffer or else instances will always report healthy
+  - pause: seconds=30
+  - name: wait for number_of_healthy_instances >= desired_capacity
+    ec2_asg_facts: name={{ asg_group_name }} region={{ region }}
+    register: result
+    until: result.healthy_instances >= tmp_min_size|int and result.in_service_instances >= tmp_min_size|int
+    delay: 10
+    retries: 120
 
 # add hosts to a group created by group_by for their ec2_image_id
 # and use intersection of imaged_id and autoscale_groupName as 
 # host target (ensures we are tackling old hosts)
-- hosts: tag_aws_autoscaling_groupName_rollingAMI
-  connection: local
+- hosts: "{{ asg_hosts }}"
   gather_facts: no
   tasks:
-  - local_action: group_by key={{ hostvars[inventory_hostname]['ec2_image_id'] }}
+  - group_by: key={{ hostvars[inventory_hostname]['ec2_image_id'] }}
+
+#instead of this, we could have a module that returned all autoscale instances in the group
+# that did not have an AMI that is specified.
+# then we would loop through that list of AMIs and would not have to rely on the inventory
 
 
-- hosts: tag_aws_autoscaling_groupName_rollingAMI:!{{ image_id }}
-  gather_facts: no
-  serial: 1
-  vars:
-    capacity: 5
-  tasks:
-  - local_action: debug var=hostvars[inventory_hostname]['ec2_image_id']
-
-  - name: terminate ec2 instance
-    local_action: ec2 state=absent
-                  instance_ids={{ hostvars[inventory_hostname]['ec2_id'] }}
-                  region=us-east-1
-                  wait=yes
-
-  - pause: seconds=61
-  - name: wait for number_of_healthy_instances >= desired_capacity
-    local_action: ec2_asg_facts name=rollingAMI region=us-east-1
-    register: result
-    until: result.healthy_instances >= capacity
-    delay: 10
-    retries: 120
+- include: terminator.yml min_num_instances="{{ tmp_min_size }}"
 
 
 # set the ASG to normal settings
-- hosts: localhost
+- hosts: "{{ target_cluster }}"
   gather_facts: no
-  connection: local
   tasks:
   - name: return settings to normal
-    ec2_asg: name=rollingAMI region=us-east-1 
-             desired_capacity=5
-             min_size=5
+    ec2_asg: name={{ asg_group_name }} region={{ region }} 
+             desired_capacity={{ asg_desired_capacity }}
+             min_size={{ asg_min_size }}
 
 

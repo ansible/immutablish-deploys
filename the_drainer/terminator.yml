@@ -1,0 +1,23 @@
+- hosts: "{{ asg_hosts }}:!{{ image_id }}"
+  gather_facts: no
+  serial: "{{ max_batch_size }}"
+  tasks:
+  - local_action: debug var=hostvars[inventory_hostname]['ec2_image_id']
+  
+
+  - name: terminate ec2 instance
+    local_action: ec2 state=absent
+                  instance_ids={{ hostvars[inventory_hostname]['ec2_id'] }}
+                  region={{ region }}
+                  wait=yes
+
+  # we need to wait for the ASG health_check_grace period + LB Unhealthythreshold * LB HealthCheck Interval
+  # + Buffer or else instances will always report healthy
+  # This ensures that instances are reported healthy as per the ELB
+  - pause: seconds=30
+  - name: wait for number_of_healthy_instances >= asg_desired_capacity
+    local_action: ec2_asg_facts name={{ asg_group_name }} region={{ region }}
+    register: result
+    until: result.healthy_instances|int >= min_num_instances|int and result.in_service_instances|int >= min_num_instances|int
+    delay: 10
+    retries: 120

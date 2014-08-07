@@ -1,0 +1,29 @@
+app_name: rollingAMI
+load_balancers: 
+- rollingAMI
+key_name: jmartin
+group_name: rollingAMI
+instance_type: m1.small
+lc_security_groups:
+- "{{ app_security_group.group_id }}"
+- "{{ admin_access_group.group_id }}"
+asg_subnets:
+- "{{ vpc.subnets[0].id }}"
+- "{{ vpc.subnets[1].id }}"
+asg_desired_capacity: 5
+asg_min_size: 5
+asg_max_size: 10
+vpc_subnets:
+  - cidr: 172.22.1.0/24
+    resource_tags: { "Name":"{{ app_name }}-1" }
+    az: us-east-1b
+  - cidr: 172.22.2.0/24
+    resource_tags: { "Name":"{{ app_name }}-2" }
+    az: us-east-1c 
+route_tables:
+  - subnets:
+      - 172.22.1.0/24
+      - 172.22.2.0/24
+    routes:
+      - dest: 0.0.0.0/0
+        gw: igw

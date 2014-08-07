@@ -25,13 +25,30 @@ except ImportError:
     print "failed=True msg='boto required for this module'"
     sys.exit(1)
 
-ASG_ATTRIBUTES = ('min_size', 'desired_capacity')
+
+ASG_ATTRIBUTES = ('min_size', 'desired_capacity', 'health_check_type')
 INSTANCE_ATTRIBUTES = ('instance_id', 'health_status', 'lifecycle_state', 'launch_config_name')
 
 # add support for getting health state of any one instance (could build dynamic groups)
 # of unhealthy instances ?
 
-def get_properties(autoscaling_group):
+def get_asg_properties(autoscaling_group):
+    properties = dict((attr, getattr(autoscaling_group, attr)) for attr in ASG_ATTRIBUTES)
+    properties['load_balancers'] = autoscaling_group.load_balancers
+    return properties
+
+
+def set_temp_asg_properties(autoscaling_group):
+    changed = False
+    for attr in ASG_ATTRIBUTES:
+            if module.params.get(attr) and getattr(as_group, attr) != module.params.get(attr):
+                changed = True
+                setattr(as_group, attr, module.params.get(attr))
+    if changed:
+        as_group.update()
+
+
+def get_instance_properties(autoscaling_group):
     properties= {}
     properties['healthy_instances'] = 0
     properties['in_service_instances'] = 0
@@ -56,24 +73,31 @@ def main():
     argument_spec = ec2_argument_spec()
     argument_spec.update(
         dict(
-            name=dict(required=True, type='str'),
+            asg=dict(required=True, type='str'),
+            max_batch_size=dict(required=True, default=1 type='int'),
+            min_num_instances=dict(required=True, default=1 type='int'),
+            launch_config=dict(required=False, default=None, type='str'),
             ami=dict(required=False, default=None, type='str')
+            wait=dict(required=False, default=30, type='int')
         )
     )
     module = AnsibleModule(argument_spec=argument_spec)
-    group_name = module.params.get('name')
+    group_name = module.params.get('asg_name')
+    launch_config = module.params.get('launch_config_name')
     ami = module.params.get('ami')
+    max_batch_size = module.params.get('max_batch_size')
+    min_num_instances = module.params.get('min_num_instances')
 
 
     region, ec2_url, aws_connect_params = get_aws_connection_info(module)
     try:
-        connection = connect_to_aws(boto.ec2.autoscale, region, **aws_connect_params)
-        if not connection:
+        asg_connection = connect_to_aws(boto.ec2.autoscale, region, **aws_connect_params)
+        if not asg_connection:
             module.fail_json(msg="failed to connect to AWS for the given region: %s" % str(region))
     except boto.exception.NoAuthHandlerFound, e:
         module.fail_json(msg=str(e))
 
-    as_groups = connection.get_all_groups(names=[group_name])
+    as_groups = asg_connection.get_all_groups(names=[group_name])
 
     as_group = as_groups[0]
     changed = False
