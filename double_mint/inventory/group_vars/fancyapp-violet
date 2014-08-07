@@ -1,0 +1,10 @@
+relative: fancyapp-blue
+key_name: jmartin
+asg_group_name: fancyapp-violet
+instance_type: m1.small
+lc_name: fancyapp-violet
+image_id: ami-1aa07172
+asg_desired_capacity: 5
+asg_min_size: 5
+asg_max_size: 10
+ 

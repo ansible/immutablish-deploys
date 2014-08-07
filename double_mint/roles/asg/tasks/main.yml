@@ -1,0 +1,44 @@
+---
+# tasks file for asg
+- name: create launch config
+  action:
+    module: ec2_lc
+    name: "{{ lc_name }}"
+    image_id: "{{ image_id }}"
+    key_name: "{{ key_name }}"
+    region: "{{ region }}"
+    security_groups: "{{ lc_security_groups }}"
+    instance_type: "{{ instance_type }}"
+    assign_public_ip: yes
+  tags: launch_config
+
+- name: create autoscale groups
+  action:
+    module: ec2_asg
+    name: "{{ asg_group_name }}"
+    health_check_period: 60 
+    load_balancers: "{{ load_balancers }}"
+    health_check_type: ELB
+    availability_zones: "{{ availability_zones | join(',')}}"
+    launch_config_name: "{{ lc_name }}"
+    min_size: "{{ asg_min_size }}"
+    max_size: "{{ asg_max_size }}"
+    desired_capacity: "{{ asg_desired_capacity }}"
+    region: "{{ region }}"
+    vpc_zone_identifier: "{{ asg_subnets | join(',') }}"
+  tags: autoscale_group
+
+- name: wait for number_of_healthy_instances >= asg_desired_capacity
+  action: ec2_asg_facts name={{ asg_group_name }} region={{ region }}
+  register: result
+  until: result.healthy_instances >= asg_desired_capacity and result.in_service_instances >= asg_desired_capacity
+  delay: 10
+  retries: 120
+
+- include: terminate_relative.yml
+  when: relative is defined and terminate_relative is defined and terminate_relative == "yes"
+
+
+
+
+

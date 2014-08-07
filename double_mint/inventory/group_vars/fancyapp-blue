@@ -1,0 +1,10 @@
+relative: fancyapp-violet
+key_name: jmartin
+asg_group_name: fancyapp-blue
+instance_type: m1.small
+lc_name: fancyapp-blue
+image_id: ami-cca170a4
+lc_security_groups:
+asg_desired_capacity: 5
+asg_min_size: 5
+asg_max_size: 10

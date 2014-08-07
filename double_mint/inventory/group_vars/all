@@ -1,0 +1,26 @@
+ansible_python_interpreter: /usr/bin/env python
+ansible_connection: local
+app_name: rollingAMI
+lb_name: blue-violet
+load_balancers: 
+- rollingAMI
+vpc_subnets:
+  - cidr: 172.22.1.0/24
+    resource_tags: { "Name":"{{ app_name }}-1" }
+    az: us-east-1b
+  - cidr: 172.22.2.0/24
+    resource_tags: { "Name":"{{ app_name }}-2" }
+    az: us-east-1c
+route_tables:
+  - subnets:
+      - 172.22.1.0/24
+      - 172.22.2.0/24
+    routes:
+      - dest: 0.0.0.0/0
+        gw: igw
+asg_subnets:
+- "{{ hostvars.localhost.vpc.subnets[0].id }}"
+- "{{ hostvars.localhost.vpc.subnets[1].id }}"
+lc_security_groups:
+- "{{ hostvars.localhost.app_security_group.group_id }}"
+- "{{ hostvars.localhost.admin_access_group.group_id }}"
