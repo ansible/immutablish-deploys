@@ -1,5 +1,0 @@
-- include: infra.yml
-- hosts: fancyapp-violet
-  gather_facts: no
-  roles:
-  - asg

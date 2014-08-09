@@ -1,0 +1,15 @@
+localhost 
+fancyapp-blue 
+fancyapp-violet
+fancyapp-rolling
+fancyapp-cfn
+
+[apps]
+fancyapp-blue 
+fancyapp-violet
+fancyapp-rolling
+fancyapp-cfn
+
+[colors]
+fancyapp-blue
+fancyapp-violet

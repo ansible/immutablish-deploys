@@ -1,7 +1,0 @@
-- name: stop iptables
-  service: name=iptables state=stopped enabled=no
-
-- name: install packages (Red Hat)
-  yum: name={{ item }} state=present
-  with_items: packages
-  tags: package

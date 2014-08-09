@@ -1,0 +1,5 @@
+- hosts: fancyapp-cfn
+  roles:
+  - role: infra
+  - role: asgcfn
+

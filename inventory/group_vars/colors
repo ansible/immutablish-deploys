@@ -1,0 +1,3 @@
+lb_name: fancyapp-blue-violet
+load_balancers:
+ - fancyapp-blue-violet

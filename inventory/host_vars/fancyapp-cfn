@@ -1,0 +1,6 @@
+app_name: rollingAMI
+lb_name: rollingAMICFN
+load_balancers: 
+- rollingAMICFN
+group_name: rollingAMICFN
+image_id: ami-1aa07172
