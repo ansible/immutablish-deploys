@@ -3,7 +3,7 @@ ansible_connection: local
 app_name: rollingAMI
 lb_name: blue-violet
 load_balancers: 
-- rollingAMI
+- blue-violet
 vpc_subnets:
   - cidr: 172.22.1.0/24
     resource_tags: { "Name":"{{ app_name }}-1" }
