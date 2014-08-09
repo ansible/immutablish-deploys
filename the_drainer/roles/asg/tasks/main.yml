@@ -27,3 +27,13 @@
     region: "{{ region }}"
     vpc_zone_identifier: "{{ asg_subnets | join(',') }}"
   tags: autoscale_group
+
+- name: wait for number_of_healthy_instances >= asg_desired_capacity
+  action: ec2_asg_facts name={{ asg_group_name }} region={{ region }}
+  register: result
+  until: result.healthy_instances >= asg_desired_capacity and result.in_service_instances >= asg_desired_capacity
+  delay: 10
+  retries: 120
+
+- include: terminator.yml
+  when: deploy_new_ami is defined and deploy_new_ami is True

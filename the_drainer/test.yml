@@ -1,25 +1,24 @@
 - hosts: localhost
   connection: local
   gather_facts: no
-  vars:
-    min_num_instances: 5
+
   tasks:
- # - group_by: key={{ hostvars[inventory_hostname]['ec2_image_id'] }}
- #   delegate_to: "{{ clustername }}"
 
-   # - name: wait for number_of_healthy_instances >= desired_capacity
-   #   ec2_asg_facts: name=rollingAMI region=us-east-1
-   #   register: result
 
-   # - name: loop through results
-   #   shell: echo {{ item.launch_config_name }}
-   #   with_items: result.instances
-   #   when: item.launch_config_name != "rollingAMI4"
-
-  - debug: var=min_num_instances
-  - name: wait for number_of_healthy_instances >= asg_desired_capacity
+  - name: collect instance info
     local_action: ec2_asg_facts name=rollingAMI region=us-east-1
     register: result
-    until: result.healthy_instances >= min_num_instances and result.in_service_instances >= min_num_instances
-    delay: 10
-    retries: 120
+
+  - name: name instances
+    set_fact: 
+      old_instances: "{{ result.instances | map(attribute='instance_id') | list  }}"
+
+
+  - name: loop through results
+    ec2_asg_instance_swap: 
+      name: rollingAMI 
+      instance_ids: "{{ item }}" 
+      region: us-east-1
+    with_items: 
+    - "{{ old_instances | batch(2) | list }}"
+

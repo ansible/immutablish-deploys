@@ -10,3 +10,6 @@
 	
 	*  spin up new instance with new AMI, with same VPC, security group info, etc
 	*  attach to new autoscale group (may require new function to ec2/ASG module but is a supported AWS feature -- http://boto.readthedocs.org/en/latest/ref/autoscale.html
+	
+	
+	[link](http://)

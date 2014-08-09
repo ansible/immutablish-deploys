@@ -32,6 +32,7 @@ INSTANCE_ATTRIBUTES = ('instance_id', 'health_status', 'lifecycle_state', 'launc
 # of unhealthy instances ?
 
 def get_properties(autoscaling_group):
+
     properties= {}
     properties['healthy_instances'] = 0
     properties['in_service_instances'] = 0
@@ -57,12 +58,12 @@ def main():
     argument_spec.update(
         dict(
             name=dict(required=True, type='str'),
-            ami=dict(required=False, default=None, type='str')
+            lc_name=dict(required=False, default=None, type='str')
         )
     )
     module = AnsibleModule(argument_spec=argument_spec)
     group_name = module.params.get('name')
-    ami = module.params.get('ami')
+    launch_config_name = module.params.get('lc_name')
 
 
     region, ec2_url, aws_connect_params = get_aws_connection_info(module)
@@ -79,7 +80,10 @@ def main():
     changed = False
     props = get_properties(as_group)
 
-
+    if launch_config_name:
+        for i in props['instances']:
+            if i['launch_config_name'] == launch_config_name:
+                props['instances'].remove(i)
 
     result = module.exit_json(changed=True, **props) 
 

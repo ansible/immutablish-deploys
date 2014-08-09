@@ -1,4 +1,5 @@
 app_name: rollingAMI
+lb_name: rollingAMI
 load_balancers: 
 - rollingAMI
 key_name: jmartin

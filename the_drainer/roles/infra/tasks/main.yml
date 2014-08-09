@@ -59,7 +59,7 @@
 - name: launch load balancer
   local_action:
     module: ec2_elb_lb
-    name: "{{ app_name }}"
+    name: "{{ lb_name }}"
     region: "{{ region }}"
     state: present
     subnets: "{{ asg_subnets }}"    
