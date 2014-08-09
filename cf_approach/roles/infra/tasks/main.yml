@@ -5,7 +5,7 @@
     state: present
     cidr_block: 172.22.0.0/16
     resource_tags: { "Name":" {{ app_name }}" }
-    subnets: "{{ subnets }}"       
+    subnets: "{{ vpc_subnets }}"       
     internet_gateway: True
     route_tables: "{{ route_tables }}"
     region: "{{ region }}"
@@ -59,12 +59,10 @@
 - name: launch load balancer
   local_action:
     module: ec2_elb_lb
-    name: "{{ app_name }}"
+    name: "{{ lb_name }}"
     region: "{{ region }}"
     state: present
-    subnets:
-    - "{{ vpc.subnets[0].id }}"
-    - "{{ vpc.subnets[1].id }}"    
+    subnets: "{{ asg_subnets }}"    
     listeners:
       - protocol: http
         load_balancer_port: 80

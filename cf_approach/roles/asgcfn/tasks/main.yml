@@ -7,13 +7,13 @@
     state=present
     region={{ region }}
     disable_rollback=true
-    template=roles/asg/files/asg_lc.json
+    template=roles/asgcfn/files/asg_lc.json
   args:
     template_parameters:
       AvailabilityZones: "{{ availability_zones | join(',') }}"
-      Subnets: "{{ subnets | join(',') }}"
+      Subnets: "{{ asg_subnets | join(',') }}"
       ImageId: "{{ image_id }}"
       KeyName: "{{ key_name }}"
-      SecurityGroups: "{{ security_groups | join(',')}}"
+      SecurityGroups: "{{ lc_security_groups | join(',')}}"
       LoadBalancerNames: "{{ load_balancers | join(',') }}"
   register: stack
