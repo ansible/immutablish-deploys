@@ -3,12 +3,14 @@ fancyapp-blue
 fancyapp-violet
 fancyapp-rolling
 fancyapp-cfn
+amibuilder
 
 [apps]
 fancyapp-blue 
 fancyapp-violet
 fancyapp-rolling
 fancyapp-cfn
+amibuilder
 
 [colors]
 fancyapp-blue

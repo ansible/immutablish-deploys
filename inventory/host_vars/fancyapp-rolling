@@ -1,5 +1,5 @@
 lb_name: rollingAMI
-lc_name: rollingAMI
+lc_name: "{{ hostvars.amibuilder.lc_name | default('rollingAMI') }}"
 load_balancers: 
 - rollingAMI
 asg_group_name: rollingAMI

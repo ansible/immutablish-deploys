@@ -1,0 +1,28 @@
+- hosts: amibuilder
+  tasks:
+
+  - name: launch temporary instance
+    ec2:
+      assign_public_ip: yes
+      region: "{{ region }}"
+      key_name: "{{ key_name }}"
+      group_id: "{{ group_id }}"
+      instance_type: m1.small
+      vpc_subnet_id: "{{ vpc_subnet_id }}"
+      image: "{{ base_image }}"
+      wait: yes
+      wait_timeout: 500
+      exact_count: 1
+      count_tag:
+         role: ami_builder
+      instance_tags:
+         role: ami_builder
+    register: ami_instance
+
+  - name: waiting for ssh to start
+    wait_for: port=22 host={{ ami_instance.tagged_instances.0.public_ip }} timeout=300
+              search_regex=OpenSSH
+
+  - name: add host to group
+    add_host: name={{ ami_instance.tagged_instances.0.public_ip }} groups=just_created
+

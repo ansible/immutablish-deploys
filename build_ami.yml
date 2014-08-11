@@ -1,54 +1,8 @@
-- hosts: localhost
-  tasks:
-
-  - name: launch temporary instance
-    ec2:
-      assign_public_ip: yes
-      region: us-east-1
-      key_name: jmartin
-      group_id: sg-b4327fd1
-      instance_type: m1.small
-      vpc_subnet_id: subnet-4ea8a466
-      image: ami-eb6b0182
-      wait: yes
-      wait_timeout: 500
-      exact_count: 1
-      count_tag:
-         role: ami_builder
-      instance_tags:
-         role: ami_builder
-    register: ami_instance
-
-  - name: waiting for ssh to start
-    wait_for: port=22 host={{ ami_instance.tagged_instances.0.public_ip }} timeout=300
-              search_regex=OpenSSH
-
-  - name: add host to group
-    add_host: name={{ ami_instance.tagged_instances.0.public_ip }} groups=just_created
-
+- include: snippets/prep_base_ami.yml
 
 - hosts: just_created
   remote_user: root
   roles:
     - apache
 
-- hosts: localhost
-  tasks:
-
-  - name: bundle ami
-    action: 
-      module: ec2_ami
-      instance_id: "{{ ami_instance.tagged_instances.0.id }}"
-      region: us-east-1
-      state: present
-      description: This was provisioned {{ ansible_date_time.iso8601 }}
-      name: myappami-{{ ansible_date_time.epoch }}
-      wait: yes
-    register: amioutput
-
-  - name: terminate temporary instance
-    action:
-      module: ec2
-      state: absent
-      region: us-east-1
-      instance_ids: "{{ ami_instance.tagged_instances.0.id }}"
+- include: snippets/bundle_ami.yml

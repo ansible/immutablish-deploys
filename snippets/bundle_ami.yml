@@ -1,0 +1,27 @@
+- hosts: amibuilder
+  tasks:
+
+  # - name: bundle ami
+  #   action: 
+  #     module: ec2_ami
+  #     instance_id: "{{ ami_instance.tagged_instances.0.id }}"
+  #     region: "{{ region }}"
+  #     state: present
+  #     description: This was provisioned {{ ansible_date_time.iso8601 }}
+  #     name: myappami-{{ ansible_date_time.epoch }}
+  #     wait: yes
+  #   register: amioutput
+
+  # - name: terminate temporary instance
+  #   action:
+  #     module: ec2
+  #     state: absent
+  #     region: "{{ region }}"
+  #     instance_ids: "{{ ami_instance.tagged_instances.0.id }}"
+
+  - name: create a name for a launch config to be used with generated AMI
+    set_fact: lc_name={{ lc_basename }}-{{ ansible_date_time.epoch }}
+
+
+
+  - debug: var=lc_name 

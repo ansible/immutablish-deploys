@@ -1,0 +1,4 @@
+base_image: ami-eb6b0182
+group_id: sg-b4327fd1
+vpc_subnet_id: subnet-4ea8a466
+lc_basename: generated
