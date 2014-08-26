@@ -40,7 +40,7 @@ This workflow can be launched with:
 
 ## Rolling AMI deploy with pure Ansible
 
-You don't *have* to use CloudFormation's Update Policies to leverage a rolling replacement approach for intsances in an ASG, you can also do it with native Ansible modules.  The current development branch for Ansible (scheduled for 1.8) supports this.
+You don't *have* to use CloudFormation's Update Policies to leverage a rolling replacement approach for intsances in an ASG, you can also do it with native Ansible modules.  The ec2_asg module in development branch of Ansible (scheduled for 1.8) supports this.
 
 
 1. New AMI is generated
