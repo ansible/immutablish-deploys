@@ -33,6 +33,10 @@ If you take a look at [this playbook](playbooks/cfn_update_policy.yml) and its r
 1. VPC, Subnets, Security groups [are created](roles/infra) with native Ansible ec2* modules.  
 2. [In a separate role](roles/asgcfn/tasks/main.yml), the Launch Configuration and the AutoScale group are created with a [CloudFormation template](roles/asgcfn/files/asg-cfgn.json) that is launched with the CloudFormation module in order to leverage the CloudFormation-only update policy described above. 
 
+This workflow can be launched with:
+
+	ansible-playbook -i build_ami cfn_update_policy.yml
+
 
 ## Rolling AMI deploy with pure Ansible
 
@@ -47,7 +51,9 @@ You don't *have* to use CloudFormation's Update Policies to leverage a rolling r
 6. The list of instances we collected through before is looped through by the batch size, and each instance is terminated.  After an instance terminated, we wait for the replacement to come online.
 7. After all instances are replaced, we set the ASG to its normal state.
 
+This workflow can be launched with:
 
+	ansible-playbook build_ami rolling_ami.yml -vv -e "deploy=yes"
 
 
 
@@ -62,7 +68,13 @@ The concept behind the blue violet approach is as follows:
 
 The main draw back to this approach is that you effectively have to have double the instances for a small amount of time while you are deploying your new AMI to the new ASG.  The plus side is that is much faster than performing a rolling approach.
 
+This workflow can be launched with:
 
+	ansible-playbook build_ami blue.yml -vv -e "deploy=yes"
+	
+and when you're ready for the violet to take over
+
+	ansible-playbook build_ami violet.yml -vv -e "deploy=yes terminate_relative=yes"
 	
 ## Blue Green deployments
 
