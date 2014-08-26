@@ -38,4 +38,4 @@
   retries: 120
 
 - include: terminator.yml
-  when: deploy_new_ami is defined and deploy_new_ami == True
+  when: deploy is defined and deploy|bool == True

@@ -51,3 +51,11 @@
       state: absent
       region: "{{ region }}"
       instance_ids: "{{ ami_instance.tagged_instances.0.id }}"
+
+  - name: create vars file with  new ami info
+    copy:
+      content: |
+             image_id: {{ amioutput.image_id }}
+             lc_suffix: {{ ansible_date_time.epoch }}
+      dest: vars/settings.yml
+    when: deploy is defined and deploy|bool == True
