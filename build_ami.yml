@@ -1,6 +1,5 @@
 - hosts: amibuilder
   tasks:
-
   - name: launch temporary instance
     ec2:
       assign_public_ip: yes

@@ -1,5 +1,6 @@
 - hosts: fancyapp-blue
-  gather_facts: no
+  vars_files:
+  - vars/settings.yml
   roles:
   - infra
   - dual_asg

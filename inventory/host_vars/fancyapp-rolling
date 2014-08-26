@@ -1,6 +1,6 @@
 lb_name: rollingAMI
-lc_name: "{{ hostvars.amibuilder.lc_name | default('rollingAMI') }}"
+lc_name: rollingAMI-{{ lc_suffix }}
 load_balancers: 
 - rollingAMI
 asg_group_name: rollingAMI
-image_id: ami-1aa07172
+batch_size: 1
