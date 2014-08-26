@@ -6,36 +6,22 @@
            desired_capacity={{ tmp_desired_capacity }}
            min_size={{ tmp_min_size }}
 
-# we need to wait for the ASG health_check_grace period + LB Unhealthythreshold * LB HealthCheck Interval
-# + Buffer or else instances will always report healthy
-- pause: seconds=30
 - name: wait for number_of_healthy_instances >= desired_capacity
-  ec2_asg_facts: name={{ asg_group_name }} region={{ region }}
+  ec2_asg: name={{ asg_group_name }} region={{ region }}
   register: result
   until: result.healthy_instances >= tmp_min_size|int and result.in_service_instances >= tmp_min_size|int
   delay: 10
   retries: 120
 
-
-- name: collect instance info
-  local_action: ec2_asg_facts name={{ asg_name }} region={{ region }}
-  register: result
-
-- name: name instances
-  set_fact: 
-    old_instances: "{{ result.instances | map(attribute='instance_id') | list  }}"
-
-
-- name: loop through results
-  ec2_asg_instance_swap: 
+- name: loop through instances and terminate them
+  ec2_asg: 
     name: rollingAMI 
     instance_ids: "{{ item }}" 
     region: us-east-1
   with_items: 
-  - "{{ old_instances | batch(batch_size) | list }}"
+  - "{{ result.instances | batch(batch_size) | list }}"
 
-
-- name: return settings to normal
+- name: return ASG settings to normal
   ec2_asg: name={{ asg_group_name }} region={{ region }}
            desired_capacity={{ asg_desired_capacity }}
            min_size={{ asg_min_size }}
