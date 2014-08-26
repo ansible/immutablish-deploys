@@ -2,8 +2,7 @@
 # tasks file for asg
 
 - name: create launch config
-  local_action:
-    module: ec2_lc
+  ec2_lc:
     name: "{{ lc_name }}"
     image_id: "{{ image_id }}"
     key_name: "{{ key_name }}"
@@ -14,8 +13,7 @@
   tags: launch_config
 
 - name: create autoscale groups
-  local_action:
-    module: ec2_asg
+  ec2_asg:
     name: "{{ asg_group_name }}"
     health_check_period: 60
     load_balancers: "{{ load_balancers }}"
@@ -30,7 +28,7 @@
   tags: autoscale_group
 
 - name: wait for number_of_healthy_instances >= asg_desired_capacity
-  action: ec2_asg name={{ asg_group_name }} region={{ region }}
+  ec2_asg: name={{ asg_group_name }} region={{ region }}
   register: result
   until: result.healthy_instances >= asg_desired_capacity and result.in_service_instances >= asg_desired_capacity
   delay: 10
