@@ -1,7 +1,6 @@
 # tasks file for myapp_infra
 - name: create vpc
-  action:
-    module: ec2_vpc
+  ec2_vpc:
     state: present
     cidr_block: 172.22.0.0/16
     resource_tags: { "Name":" {{ app_name }}" }
@@ -14,8 +13,7 @@
 
 
 - name: create admin access 
-  action: 
-    module: ec2_group
+  ec2_group:
     name: admin_access
     description: SSH access for admins and tower
     region: "{{ region }}"
@@ -28,10 +26,8 @@
   tags: security_groups
   register: admin_access_group
 
-
 - name: create app security group
-  action:
-    module: ec2_group
+  ec2_group:
     name: "{{ app_name }}"
     description: "{{ app_name }} security group"
     region: "{{ region }}"
@@ -57,8 +53,7 @@
   register: app_security_group
 
 - name: launch load balancer
-  local_action:
-    module: ec2_elb_lb
+  ec2_elb_lb:
     name: "{{ lb_name }}"
     region: "{{ region }}"
     state: present
