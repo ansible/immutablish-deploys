@@ -5,6 +5,7 @@
            region={{ region }}
            desired_capacity={{ tmp_desired_capacity }}
            min_size={{ tmp_min_size }}
+           max_size={{ tmp_max_size }}
 
 - name: wait for number_of_healthy_instances >= desired_capacity
   ec2_asg: name={{ asg_group_name }} region={{ region }}
@@ -15,13 +16,15 @@
 
 - name: loop through instances and terminate them
   ec2_asg: 
-    name: rollingAMI 
-    instance_ids: "{{ item }}" 
-    region: us-east-1
+    name: "{{ asg_group_name }}"
+    instance_ids: "{{ item }}"
+    region: "{{ region }}"
   with_items: 
   - "{{ result.instances | batch(batch_size) | list }}"
 
 - name: return ASG settings to normal
-  ec2_asg: name={{ asg_group_name }} region={{ region }}
+  ec2_asg: name={{ asg_group_name }}
+           region={{ region }}
            desired_capacity={{ asg_desired_capacity }}
            min_size={{ asg_min_size }}
+           max_size={{ asg_max_size }}

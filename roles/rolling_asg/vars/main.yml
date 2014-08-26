@@ -2,3 +2,4 @@
 # vars file for asg
 tmp_desired_capacity: "{{ asg_desired_capacity + batch_size }}"
 tmp_min_size: "{{ asg_min_size + batch_size }}"
+tmp_max_size: "{{ asg_max_size + batch_size }}"
