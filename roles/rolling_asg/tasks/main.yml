@@ -1,7 +1,6 @@
 ---
 # tasks file for asg
 
-
 - name: create launch config
   local_action:
     module: ec2_lc
