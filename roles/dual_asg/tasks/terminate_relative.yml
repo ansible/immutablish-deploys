@@ -1,13 +1,12 @@
 - name: terminate relative asg
-  action:
-    module: ec2_asg
+  ec2_asg:
     name: "{{ relative }}"
     state: absent
     region: "{{ region }}"
+  register: result
 
 - name: terminate relative launch_config
-  action:
-    module: ec2_lc
-    name: "{{ relative }}"
+  ec2_lc:
+    name: "{{ result.launch_config_name }}"
     region: "{{ region }}"
     state: absent
