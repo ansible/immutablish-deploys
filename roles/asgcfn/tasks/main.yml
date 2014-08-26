@@ -3,7 +3,7 @@
 
 - name: Create AutoScale Group and LaunchConfig via cloudformation
   cloudformation: >
-    stack_name={{ group_name }} 
+    stack_name={{ app_name }} 
     state=present
     region={{ region }}
     disable_rollback=true

@@ -57,7 +57,7 @@
                 "AvailabilityZones" : { "Ref": "AvailabilityZones"},                
                 "LaunchConfigurationName": { "Ref": "LaunchConfig" },
                 "HealthCheckType": "ELB",
-                "HealthCheckGracePeriod": "60",
+                "HealthCheckGracePeriod": "300",
                 "MinSize": "5",
                 "MaxSize": "10",
                 "DesiredCapacity" : "5",

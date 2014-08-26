@@ -1,4 +1,6 @@
 - hosts: fancyapp-cfn
+  vars_files:
+  - vars/settings.yml
   roles:
   - role: infra
   - role: asgcfn
