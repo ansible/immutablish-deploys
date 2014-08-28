@@ -17,7 +17,7 @@
 - name: loop through instances and terminate them
   ec2_asg: 
     name: "{{ asg_group_name }}"
-    instance_ids: "{{ item }}"
+    replace_instances: "{{ item }}"
     region: "{{ region }}"
   with_items: 
   - "{{ result.instances | batch(batch_size) | list }}"
