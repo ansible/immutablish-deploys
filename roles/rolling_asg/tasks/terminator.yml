@@ -5,23 +5,24 @@
     name: "{{ asg_group_name }}"
     health_check_period: 60
     health_check_type: ELB
+    launch_config_name: "{{ lc_name }}"
     min_size: "{{ tmp_min_size }}"
     max_size: "{{ tmp_max_size }}"
     desired_capacity: "{{ tmp_desired_capacity }}"
     region: "{{ region }}"
-  until: result.healthy_instances >= tmp_desired_capacity and result.in_service_instances >= tmp_desired_capacity
+  register: result
+  until: result.viable_instances|int >= tmp_desired_capacity|int
   delay: 10
   retries: 120
-  register: result
   tags: autoscale_group
 
-- name: loop through instances and terminate them
+- name: loop through old instances and terminate them
   ec2_asg: 
     name: "{{ asg_group_name }}"
     replace_instances: "{{ item }}"
     region: "{{ region }}"
   with_items: 
-  - "{{ result.instances | batch(batch_size) | list }}"
+  - "{{ asg_result.instances | batch(batch_size) | list }}"
 
 - name: return ASG settings to normal
   ec2_asg:

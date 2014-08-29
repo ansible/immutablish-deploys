@@ -25,10 +25,10 @@
     desired_capacity: "{{ asg_desired_capacity }}"
     region: "{{ region }}"
     vpc_zone_identifier: "{{ asg_subnets | join(',') }}"
-  until: result.healthy_instances >= asg_desired_capacity and result.in_service_instances >= asg_desired_capacity
+  until: asg_result.viable_instances|int >= asg_desired_capacity|int
   delay: 10
   retries: 120
-  register: result
+  register: asg_result
   tags: autoscale_group
 
 - include: terminator.yml
