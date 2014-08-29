@@ -33,3 +33,15 @@
 
 - include: terminator.yml
   when: deploy is defined and deploy|bool == True
+
+# use the clean but opaque module-contained rolling replace
+# - name: loop through old instances and terminate them
+#   ec2_asg: 
+#     name: "{{ asg_group_name }}"
+#     replace_batch_size: 1
+#     replace_all_instances: yes
+#     min_size: "{{ asg_min_size }}"
+#     max_size: "{{ asg_max_size }}"
+#     desired_capacity: "{{ asg_desired_capacity }}"
+#     region: "{{ region }}"
+#   when: deploy is defined and deploy|bool == True
