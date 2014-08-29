@@ -1,18 +1,19 @@
-  # temporarily increase the desired_capacity and minimum_size by
-  # the batch_size
+# temporarily increase the desired_capacity and minimum_size by
+# the batch_size
 - name: set temporary settings
-  ec2_asg: name={{ asg_group_name }}
-           region={{ region }}
-           desired_capacity={{ tmp_desired_capacity }}
-           min_size={{ tmp_min_size }}
-           max_size={{ tmp_max_size }}
-
-- name: wait for number_of_healthy_instances >= desired_capacity
-  ec2_asg: name={{ asg_group_name }} region={{ region }}
-  register: result
-  until: result.healthy_instances >= tmp_min_size|int and result.in_service_instances >= tmp_min_size|int
+  ec2_asg:
+    name: "{{ asg_group_name }}"
+    health_check_period: 60
+    health_check_type: ELB
+    min_size: "{{ tmp_min_size }}"
+    max_size: "{{ tmp_max_size }}"
+    desired_capacity: "{{ tmp_desired_capacity }}"
+    region: "{{ region }}"
+  until: result.healthy_instances >= tmp_desired_capacity and result.in_service_instances >= tmp_desired_capacity
   delay: 10
   retries: 120
+  register: result
+  tags: autoscale_group
 
 - name: loop through instances and terminate them
   ec2_asg: 
@@ -23,8 +24,11 @@
   - "{{ result.instances | batch(batch_size) | list }}"
 
 - name: return ASG settings to normal
-  ec2_asg: name={{ asg_group_name }}
-           region={{ region }}
-           desired_capacity={{ asg_desired_capacity }}
-           min_size={{ asg_min_size }}
-           max_size={{ asg_max_size }}
+  ec2_asg:
+    name: "{{ asg_group_name }}"
+    health_check_period: 60
+    health_check_type: ELB
+    min_size: "{{ asg_min_size }}"
+    max_size: "{{ asg_max_size }}"
+    desired_capacity: "{{ asg_desired_capacity }}"
+    region: "{{ region }}"

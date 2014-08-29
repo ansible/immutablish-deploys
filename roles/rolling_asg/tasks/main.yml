@@ -25,14 +25,11 @@
     desired_capacity: "{{ asg_desired_capacity }}"
     region: "{{ region }}"
     vpc_zone_identifier: "{{ asg_subnets | join(',') }}"
-  tags: autoscale_group
-
-- name: wait for number_of_healthy_instances >= asg_desired_capacity
-  ec2_asg: name={{ asg_group_name }} region={{ region }}
-  register: result
   until: result.healthy_instances >= asg_desired_capacity and result.in_service_instances >= asg_desired_capacity
   delay: 10
   retries: 120
+  register: result
+  tags: autoscale_group
 
 - include: terminator.yml
   when: deploy is defined and deploy|bool == True
