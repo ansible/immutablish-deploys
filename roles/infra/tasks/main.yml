@@ -11,6 +11,19 @@
     wait: yes
   register: vpc
 
+- name: create ELB security group
+  ec2_group:
+    name: "{{ app_name }}-ELB"
+    description: "{{ app_name }} ELB security group"
+    region: "{{ region }}"
+    vpc_id: "{{ vpc.vpc_id }}"
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+  tags: security_groups
+  register: elb_sec_group
 
 - name: create admin access 
   ec2_group:
@@ -59,6 +72,9 @@
     state: present
     subnets: "{{ asg_subnets }}"
     connection_draining_timeout: 60
+    cross_az_load_balancing: yes
+    security_group_ids:
+    - "{{ elb_sec_group.group_id }}"
     listeners:
       - protocol: http
         load_balancer_port: 80
