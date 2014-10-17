@@ -1,4 +1,4 @@
-base_image: ami-eb6b0182
+base_image: ami-8997afe0
 group_id: sg-ada30fc8
 vpc_subnet_id: subnet-3c61527a
 ansible_ssh_user: root
