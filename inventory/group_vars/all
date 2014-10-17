@@ -2,6 +2,7 @@ app_name: rollingAMI
 instance_type: m1.small
 region: us-east-1
 key_name: jmartin
+lameapp_version: 1.1
 lc_security_groups:
 - "{{ app_security_group.group_id }}"
 - "{{ admin_access_group.group_id }}"
