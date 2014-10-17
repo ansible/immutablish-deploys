@@ -25,10 +25,14 @@
   - name: add host to group
     add_host: name={{ ami_instance.tagged_instances.0.public_ip }} groups=just_created
 
+  - name: pause for 10 seconds
+    pause: seconds=10
+
 - hosts: just_created
   remote_user: root
   roles:
-    - apache
+  - common
+  - lameapp
 
 - hosts: amibuilder
   tasks:

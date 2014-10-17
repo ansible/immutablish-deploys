@@ -1,0 +1,3 @@
+---
+dependencies:
+  - { role: apache, apache_test_message: now included as a depedency }
